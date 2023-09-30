@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css?family=Orbitron&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Hind&display=swap');
+
+* {
+  -webkit-font-smoothing: antialiased;
+  color: #acbdce;
+}
+
+:root {
+  --border-radius: 10px;
+}
+
+body, html {
+  background: #D0E7D2;
+  display: grid;
+  height: 100%;
+  grid-template: 1fr/100%;
+  place-items: center;
+}
+
+.Card {
+  padding: 1px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+
+  width: 380px;
+  
+}
+
+.CardInner {
+  padding: 16px;
+  background-color:#008060;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+}
+
+.Icon {
+  min-width: 46px;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+label {
+  font-family: "Hind", sans-serif;
+  display: block;
+  color: white;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, white, white);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  align-self: flex-start;
+}
+
+.InputContainer {
+  width: 100%;
+}
+
+input {
+  background-color: #B0D9B1;
+  padding: 16px;
+  border: none;
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  color: #a9b8c9;
+  width: 100%;
+}
+
+.InputContainer:before,
+.InputContainer:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.InputContainer:before {
+  top: 0;
+  left: 0;
+  box-shadow: inset 1px 1px 3px white, inset 2px 2px 6px white;
+}
+
+.InputContainer:after {
+  bottom: 0;
+  right: 0;
+  box-shadow: inset -2px -2px 4px white;
+}
+
+/* CSS for the spinner */
+.spinner {
+  --size: 1.25em;
+  --offset-r: calc(var(--size) * -1);
+  --offset-l: 0;
+  --opacity: 0;
+  
+  position: relative;
+  display: inline-flex;
+  height: var(--size);
+  width: var(--size);
+  margin-top: calc(var(--size) * -0.5);
+  margin-right: var(--offset-r);
+  margin-bottom: calc(var(--size) * -0.5);
+  margin-left: var(--offset-l);
+  box-sizing: border-box;
+  border: 0.125em solid rgba(255, 255, 255, 0.333);
+  border-top-color: white;
+  border-radius: 50%;
+  opacity: var(--opacity);
+  transition: 0.25s;
+}
+
+/* Show the spinner */
+.spinner.visible {
+  --size: 1em;
+  --offset-r: 0.333em;
+  --offset-l: -0.333em;
+  --opacity: 1;
+  animation: load 0.666s infinite;
+}
+
+@keyframes load {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

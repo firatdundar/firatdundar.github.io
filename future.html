@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="shortcut icon" href="https://preview.redd.it/if-i-eat-him-will-it-be-double-protein-v0-hh6iw4y442wa1.jpg?auto=webp&s=9af315e8871c2fd3cb56ec844baad41f513fb5cd" type="image/x-icon">
+  <title>Result Page</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/d3-zoom.v2.min.js"></script>
+  <style>
+    .tooltip {
+      position: absolute;
+      background-color: #ffffff;
+      border: 1px solid #000000;
+      padding: 10px;
+      z-index: 9999;
+      font-size: 14px;
+      color: #000000;
+      border-radius: 5px;
+      pointer-events: none; /* Ensures that the tooltip does not interfere with mouse events on the underlying elements */
+    }
+    /* width */
+    ::-webkit-scrollbar {
+      width: 20px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      background: #888; /* color of the track */
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: #f1f1f1; /* color of the handle */
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f1f1f1; /* color of the handle on hover */
+    }
+    /*FFD7BC*/
+    .logo {
+      position: fixed;
+      bottom: 10px;
+      left: 90%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the logo appears above other content */
+      width: 75px;
+    }
+    .logo2 {
+      position: fixed;
+      bottom: 10px;
+      left: 95%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the logo appears above other content */
+      width: 100px;
+    }
+
+    body {
+      background-color: #D0E7D2; /* Change this color to your desired background color */
+    }
+    #backbone-line {
+      position: absolute;
+      display: none;
+      width: 1px;
+      height: 100%;
+      background-color: rgba(128, 128, 128, 0.5); /* Gray color with 50% opacity */
+      pointer-events: none; /* Allow mouse events to pass through the gray line */
+      transition: left 0.2s ease; /* Smooth transition */
+    }
+    .backbone {
+      fill: none;
+      stroke: black;
+    }
+
+    .sequence-box {
+      fill: lightblue;
+      cursor: pointer;
+    }
+
+    /* Add sequence container styles */
+    #sequence-container {
+      display: flex;
+      overflow: hidden;
+      align-items: center;
+      /*border: 1px solid #ccc;*/
+      width: 100%;
+      margin-left: 10px;
+      letter-spacing: 0px; /* Initial letter spacing */
+      transition: letter-spacing 0.2s ease; /* Smooth transition */
+    }
+
+    /* Add sequence letter styles */
+    .sequence-letter {
+      font-size: 10px;
+      font-family: "Courier New", monospace;
+    }
+
+    #svg-container {
+      width: 100%;
+      max-width: 1600px;
+      height: 150px;
+      overflow: auto; /* Add overflow property */
+      position: relative; /* Add position property */
+    }
+
+    #canvas {
+      overflow:visible;
+    }
+
+    #info-boxes {
+    border: 1px solid black;
+    padding: 10px;
+    position: absolute;
+    top: 355px;
+    left: 8px;
+    max-height: 350px; /* Set a maximum height for the info box */
+    overflow-y: auto; /* Enable vertical scrolling when content overflows */
+    }
+
+    .custom-button {
+      display: inline-block;
+                    outline: 0;
+                    cursor: pointer;
+                    text-align: center;
+                    border: 0;
+                    padding: 7px 16px;
+                    min-height: 36px;
+                    min-width: 36px;
+                    color: #ffffff;
+                    background: #008060;
+                    border-radius: 4px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px, rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+                    margin-top: 10px;
+                
+    }
+
+    .custom-button:hover {
+        background-color:  #006e52; /* Darker green when hovering */
+    }
+
+    .zoom-button {
+
+      display: inline-block;
+                    outline: none;
+                    cursor: pointer;
+                    font-weight: 500;
+                    border: 1px solid transparent;
+                    border-radius: 2px;
+                    height: 36px;
+                    line-height: 34px;
+                    font-size: 14px;
+                    color: #ffffff;
+                    background-color: #007c89;
+                    transition: background-color 0.2s ease-in-out 0s, opacity 0.2s ease-in-out 0s;
+                    padding: 0 18px;    
+                    margin-bottom: 10px;            
+    }
+
+    .zoom-button:hover {
+      color: #ffffff;
+      background-color: #006570;
+    }
+
+    .zoom-button img {
+    width: 24px; /* Adjust the width of the image */
+    height: 24px; /* Adjust the height of the image */
+    margin-top:5px;
+    }
+  </style>
+</head>
+<body>
+  <img src="lablogo.png" alt="Your Logo" class="logo2">
+  <img src="logo.png" alt="Your Logo" class="logo">
+        <!-- Add Zoom In button -->
+  <button id="zoom-in-button" class="zoom-button">
+    <img src="zoomin.png" alt="Zoom In">
+  </button>
+  <!-- Add Zoom Out button -->
+  <button id="zoom-out-button" class="zoom-button">
+    <img src="zoomout.png" alt="Zoom Out">
+  </button>
+  <input type="checkbox" id="tickbox-${keyname}-${dbname}">
+  <div id="svg-container" style="width: 100%; height: 200px; background-color: rgb(255, 255, 255);">
+    <div id="backbone-line"></div>
+    <div id="sequence-container">
+      <div id="sequence-letters-container"></div>
+    </div>
+    <svg id="canvas" width="1500" height="75"></svg>
+  </div>
+  <button id="default-setter-button" class="custom-button">Set Default Intervals</button>
+  <div id="info-boxes"></div>
+  <script>
+    let backbone;
+    let intervalsData = {};
+    let keynameToButtonsMap = {};
+
+    var originalBackboneWidth;
+    let currentZoomLevel = 0.5;
+    const zoomScaleFactor = 0.1;
+    const sequenceBoxSpacing = 5; 
+    
+    let isVisibleNow = false;
+    let backboneWidth;
+    let sequence;
+    let sequenceBoxHeight = 2;
+    let canvasWidth = 1500;
+    let sequenceContCheck = false;
+    let backboneStartInitial = 0;
+    let currentBackbone = 0;
+    let prevZoom = 1;
+    let forInfoBox = 0;
+    let letterSpacing = 0;
+    let rankingArray = ["pfam", "cathgene3d", "ssf", "panther", "cdd", "profile", "smart", "ncbifam", "prosite", "prints", "hamap", "pirsf", "sfld"];
+    const distinctColors = [
+      '#1f77b4', // Blue
+      '#ff7f0e', // Orange
+      '#2ca02c', // Green
+      '#d62728', // Red
+      '#9467bd', // Purple
+      '#8c564b', // Brown
+      '#e377c2', // Pink
+      '#7f7f7f', // Gray
+      '#bcbd22', // Olive
+      '#17becf', // Teal
+      '#aec7e8', // Light Blue
+      '#ffbb78', // Light Orange
+      '#98df8a', // Light Green
+    ];
+    
+    var canvas = d3.select("#canvas")
+    .append("svg")
+    .attr("overflow","visible")
+    .attr("height", 200);
+    
+    const sequenceContainer = document.getElementById('sequence-container');
+
+    const zoomInButton = document.getElementById("zoom-in-button");
+    const zoomOutButton = document.getElementById("zoom-out-button"); 
+
+    zoomInButton.addEventListener("click", zoomIn);
+    zoomOutButton.addEventListener("click", zoomOut);
+
+    function updateSequenceContainerVisibility(zoomedBackboneWidth) {
+      const sequenceContainer = document.getElementById('sequence-container');
+      const numLetters = sequence.length;
+      const requiredBackboneWidth = numLetters * 6.01;
+
+      if (zoomedBackboneWidth >= requiredBackboneWidth) {
+        sequenceContainer.style.display = '';
+        sequenceContCheck=true;
+      } else {
+        sequenceContainer.style.display = 'none';
+        //sequenceContainer.style.display = '';
+      }
+    }
+    
+    function applySequenceContainerZoom(backboneStartX) {
+      
+      const sequenceContainer = document.getElementById('sequence-container');
+      const zoomedBackboneWidth = originalBackboneWidth * currentZoomLevel;
+      const xOffset = (originalBackboneWidth - zoomedBackboneWidth) / 2.0;
+
+      // Calculate the new left position based on the backbone's position and zoom level
+      const sequenceContainerLeft = backboneStartX;
+      sequenceContainer.style.letterSpacing = '0px'
+      // Update the sequence container's width and left position
+      sequenceContainer.style.width = `${zoomedBackboneWidth-(zoomedBackboneWidth / (originalBackboneWidth/3)-6.01)/2}px`;
+      sequenceContainer.style.marginLeft = `${sequenceContainerLeft}px`;
+      updateSequenceContainerVisibility(zoomedBackboneWidth);
+      if(sequenceContCheck==true){
+        letterSpacing = zoomedBackboneWidth / (originalBackboneWidth/3.0)-6.01;
+        sequenceContainer.style.letterSpacing = `${zoomedBackboneWidth / (originalBackboneWidth/3)-6.01}px`;
+        sequenceContainer.style.paddingLeft = `${(zoomedBackboneWidth / (originalBackboneWidth/3)-6.01)/2.0}px`;  // Adjust the spacing as needed
+        //sequenceContainer.style.paddingRight = `${(zoomedBackboneWidth / (originalBackboneWidth/3)-6.01)/2}px`; // Adjust the spacing as needed
+      }
+      sequenceContCheck = false;
+      // Update the letter spacing based on zoom level
+      //sequenceContainer.style.letterSpacing = `${0 + (currentZoomLevel - 1) * 2}px`;
+
+    }
+
+    function zoomIn() {
+      prevZoom = currentZoomLevel;
+      currentZoomLevel += zoomScaleFactor;
+      applyZoom();
+    }
+
+    function zoomOut() {
+      prevZoom = currentZoomLevel;
+      currentZoomLevel = Math.max(currentZoomLevel - zoomScaleFactor, 0);
+      applyZoom();
+    }
+
+    function applyZoom() {
+      console.log("Zoom level", currentZoomLevel);
+      const zoomedBackboneWidth = originalBackboneWidth * currentZoomLevel;
+
+      const xOffset = (originalBackboneWidth - zoomedBackboneWidth) / 2.0;
+      prevCanvas = canvasWidth;
+      canvasWidth = (canvasWidth/prevZoom)*currentZoomLevel;
+      const canvasWidthHalf = canvasWidth/2.0;
+
+      const backboneStartX = canvasWidthHalf - (zoomedBackboneWidth / 2.0);
+      // Update the canvas width to match the zoomed backbone width
+      const canvas1 = document.getElementById('canvas');
+      canvas1.setAttribute("width", canvasWidth); 
+      console.log("Canvas center updated:", canvasWidth/2);
+      console.log("Backbone start", backboneStartX);
+      console.log("Canvas width updated:", canvasWidth);
+      // Apply zoom and positioning to the backbone
+      backbone.attr("x1", backboneStartX)
+        .attr("x2",backboneStartX + zoomedBackboneWidth);
+      
+      // Update the font size of the text elements based on zoom level
+      d3.selectAll("text.sequence-part")
+      .style("font-size", function () {
+        const originalX = parseFloat(d3.select(this).attr("data-original-x"));
+        const widthRect = parseFloat(d3.select(this).attr("width"));
+        var lengthText = parseFloat(d3.select(this).attr("length"));
+        var originalFontSize = parseFloat(d3.select(this).attr("font"));
+
+        if(lengthText*6.6 > widthRect*currentZoomLevel){
+          return `0px`;
+        }
+        else{
+          if (originalFontSize*currentZoomLevel < 14){
+            return `12px`;
+          }
+          else if (originalFontSize*currentZoomLevel > 32){
+            return `32px`;
+          }
+          else{
+            return `${originalFontSize*currentZoomLevel}px`;
+          }
+        }
+        // Set a minimum and maximum font size
+        //const minFontSize = 0;
+        //const maxFontSize = 10;
+        // Calculate the adjusted font size based on zoom level
+        //const adjustedFontSize = originalFontSize * currentZoomLevel;
+
+        // Limit the font size to the defined range
+        //const limitedFontSize = Math.max(minFontSize, Math.min(maxFontSize, adjustedFontSize));
+      })
+      .attr("x", function (d) {
+        const originalX = parseFloat(d3.select(this).attr("data-original-x"));
+        
+        // Calculate the adjusted x position based on the change in backbone position and zoom level
+        const adjustedX = originalX*currentZoomLevel + ((backboneStartX - currentBackbone) / prevZoom) * currentZoomLevel;
+        //const newX = ((originalX-currentBackbone)/prevZoom)*currentZoomLevel
+        // Calculate the new width of the rectangle based on zoom level
+        const originalWidth = parseFloat(d3.select(this).attr("data-original-width"));
+        const newWidth = (originalWidth / prevZoom) * currentZoomLevel;
+        console.log("const",(adjustedX-backboneStartX)/currentZoomLevel)
+        return adjustedX; // Adjusted x position
+      });
+
+      console.log("prevBackbone", currentBackbone, prevZoom, backboneStartX);
+      
+      
+      // Update the position and dimensions of the rectangles
+      d3.selectAll("rect.sequence-part")
+      .attr("x", function (d) {
+        const originalX = parseFloat(d3.select(this).attr("data-original-x"));
+        const adjustedX = backboneStartX + (Math.abs(backboneStartInitial-originalX))*currentZoomLevel;
+        forInfoBox = adjustedX;
+        // Calculate the adjusted x position based on the change in backbone position and zoom level
+        //const adjustedX = originalX*currentZoomLevel + ((backboneStartX - currentBackbone) / prevZoom) * currentZoomLevel;
+        //const newX = ((originalX-currentBackbone)/prevZoom)*currentZoomLevel
+        // Calculate the new width of the rectangle based on zoom level
+        const originalWidth = parseFloat(d3.select(this).attr("data-original-width"));
+        const newWidth = originalWidth * currentZoomLevel;
+        console.log("const",(adjustedX-backboneStartX)/currentZoomLevel)
+        return adjustedX; // Adjusted x position
+      })
+      .attr("width", function (d) {
+        const originalWidth = parseFloat(d3.select(this).attr("data-original-width"));
+        const newWidth = originalWidth * currentZoomLevel;
+        return newWidth; // New width after zoom
+      });
+      console.log("const", "end");
+      applySequenceContainerZoom(backboneStartX);
+      updateSequenceContainerVisibility(zoomedBackboneWidth);
+      currentBackbone = backboneStartX;
+    }
+
+    function createToggleFunctionn(keyname, dbname) {
+        console.log("Toggle function called for:", keyname, dbname);
+        return function () {
+            const shapes = d3.selectAll("." + keyname + dbname);
+
+            const anyShapeVisible = shapes.nodes().some(node => d3.select(node).attr("display") === "block");
+
+            shapes.attr("display", anyShapeVisible ? "none" : "block")
+            .raise();
+
+            const visibleShapes = shapes.filter((_, index, nodes) => d3.select(nodes[index]).attr("display") === "block");
+
+            if (visibleShapes.size() > 0) {
+                const intervals = visibleShapes.filter(".toggle").nodes().map(node => {
+                    const start = parseFloat(d3.select(node).attr("start")); // Assuming your rect element has a "start" attribute
+                    const end = parseFloat(d3.select(node).attr("end")); // Assuming your rect element has an "end" attribute
+                    const name = d3.select(node).attr("name"); // Assuming your rect element has a "name" attribute
+                    return { start, end, name };
+                });
+                intervalsData[keyname + dbname] = intervals;
+            } else {
+                clearInfoBox(keyname + dbname);
+            }
+
+            updateInfoBox();
+                    // Update the tickbox's state based on the visibility of the shapes
+            const tickbox = document.getElementById(`tickbox-${keyname}-${dbname}`);
+            if (tickbox) {
+                tickbox.checked = !anyShapeVisible;
+            }
+        };
+    }
+
+    function updateInfoBox() {
+      const infoBox = document.getElementById("info-boxes");
+      if (infoBox) {
+        // Clear the previous content of the info boxes
+        infoBox.innerHTML = "";
+
+        // Create or update the information box for each keyname
+        for (const keyname in intervalsData) {
+          const intervals = intervalsData[keyname];
+
+          // Filter the intervals to include only the visible ones
+          const visibleIntervals = intervals.filter(interval => {
+            const { start, end } = interval;
+            const rect = d3.selectAll("." + keyname).filter(function () {
+              const rectStart = parseFloat(d3.select(this).attr("start"));
+              const rectEnd = parseFloat(d3.select(this).attr("end"));
+              return rectStart <= end && rectEnd >= start && d3.select(this).attr("display") === "block";
+            });
+            return rect.size() > 0;
+          });
+
+          if (visibleIntervals.length > 0) {
+            const keynameInfoBox = document.createElement("div");
+            keynameInfoBox.id = `info-box-${keyname}`;
+            keynameInfoBox.innerHTML = `<strong>${keyname} Interval Information:</strong><br>`;
+
+            for (const interval of visibleIntervals) {
+              keynameInfoBox.innerHTML += `Name: ${interval.name} Interval: ${interval.start} - ${interval.end}<br>`;
+            }
+
+            infoBox.appendChild(keynameInfoBox);
+          }
+        }
+      }
+    }
+
+    function clearInfoBox(keyname) {
+        const infoBox = document.getElementById("info-boxes");
+        if (infoBox) {
+          const keynameInfoBox = document.getElementById(`info-box-${keyname}`);
+          if (keynameInfoBox) {
+            // If the information box for this keyname exists, remove it
+            infoBox.removeChild(keynameInfoBox);
+          }
+        }
+
+        // Clear the intervalsData for this keyname when all shapes are hidden
+        delete intervalsData[keyname];
+    }
+
+    function createShapes(data) {
+        let checker = 0;
+        while (Object.keys(data[Object.keys(data)[checker]]).length == 0){
+          checker+=1;
+          console.log(checker);
+          console.log(data[Object.keys(data)[checker]]);
+        }
+        var data2 = data[Object.keys(data)[checker]];
+        console.log(data[Object.keys(data)[checker]]);
+        console.log(data2);
+        console.log(checker);
+        var proteinlength = (data2[Object.keys(data2)[0]])[0]["proteinlength"];
+
+        originalBackboneWidth = proteinlength * 3;
+        canvasWidth = originalBackboneWidth + 50;
+        backboneStartInitial = canvasWidth/2 - originalBackboneWidth/2;
+        backbone = canvas.append("line")
+            .attr("x1", canvasWidth/2 - originalBackboneWidth/2)
+            .attr("y1",50)
+            .attr("x2", canvasWidth/2 - originalBackboneWidth/2 +  originalBackboneWidth)
+            .attr("y2",50)
+            .attr("stroke", "gray")
+            .attr("stroke-width", 15);
+
+        currentBackbone = backboneStartInitial;
+
+        sequence = data['sequence'].split("");
+        canvas.attr("width", originalBackboneWidth + 50); 
+        const sequenceContainer = document.getElementById('sequence-container');
+        // Populate the sequence container with the sequence letters
+        sequence.forEach(letter => {
+          const sequenceLetter = document.createElement('div');
+          sequenceLetter.textContent = letter;
+          sequenceLetter.classList.add('sequence-letter');
+          sequenceContainer.appendChild(sequenceLetter);
+        });
+        applySequenceContainerZoom(canvasWidth/2 - originalBackboneWidth/2);
+
+        for(let k = 0; k < Object.keys(data).length-1; k++){
+            var databasedata = data[Object.keys(data)[k]];
+
+            const transparency = 0.5;
+
+            const colorarray = ["white","blue", "red", "green", "orange", "purple"];
+            let index = Math.floor(Math.random() * 4);
+            //var color = colorarray[index];
+            var color = colorarray[0];
+
+            if (Object.keys(databasedata).length != 0){
+              var keyname = Object.keys(databasedata)[0];
+              var dbname = Object.keys(data)[k];
+              
+              if (dbname !== "sequence") {
+                  const databasedata = data[dbname];
+                  //const proteinlength = databasedata[Object.keys(databasedata)[0]][0]["proteinlength"];
+                  const keyname = Object.keys(databasedata)[0];
+
+                  // Create a button for the current dbname
+                  const keyDbButtonId = `btn_${keyname}_${dbname}`;
+                  const keyDbButton = d3.select("body")
+                  .append("button")
+                  .attr("id", keyDbButtonId)
+                  .text(`Toggle ${keyname} ${dbname}`)
+                  .classed("custom-button", true);
+
+                  // Create a tickbox for the visibility state
+                  const tickboxId = `tickbox-${keyname}-${dbname}`;
+                  const tickbox = d3.select("body")
+                      .append("input")
+                      .attr("type", "checkbox")
+                      .attr("id", tickboxId);
+
+                  // Store the button in the keynameToButtonsMap
+                  keynameToButtonsMap[keyname] = keynameToButtonsMap[keyname] || [];
+                  keynameToButtonsMap[keyname].push(keyDbButton);
+
+                  // Create a toggle function for the button
+                  keyDbButton.on("click", createToggleFunctionn(keyname, dbname));
+              }
+          
+
+              const dataList = databasedata[keyname];
+
+              backboneWidth = originalBackboneWidth * currentZoomLevel;
+
+              for (let a = 0; a < dataList.length; a++) {
+                  const proteinpartdict = dataList[a];
+                  const namez = proteinpartdict["name"] || "unintegrated";
+                  console.log(proteinpartdict);
+
+                  for (let b = 0; b < Object.keys(proteinpartdict).length - 4; b++) {
+                  const propart = proteinpartdict[b];
+                  const start = propart[0] * 3 + backboneStartInitial;
+                  const end = propart[1] * 3 + backboneStartInitial;
+                  const shortname = proteinpartdict["shortname"];
+                  console.log("4");
+                  console.log("Start:", start, "End:", end);
+                  
+                      var rectWidth = (end - start);
+                      var rectHeight = 45;
+                    
+                      var visualpart = canvas.append("rect")
+                      .attr("x", start)
+                      .attr("y", keyname === "TRANSMEMBRANE" ? 20 : 30)
+                      .attr("width", rectWidth)
+                      .attr("height", keyname === "TRANSMEMBRANE" ? rectHeight+20 : rectHeight)
+                      .attr("fill", keyname === "TRANSMEMBRANE" ? "blue" : color)
+                      .classed(keyname + dbname, true)
+                      .attr("data-original-color", keyname === "TRANSMEMBRANE" ? "blue" : color) // Store the original color
+                      .attr("dbname", dbname)
+                      .classed("sequence-part", true)
+                      .classed("toggle", true)
+                      .attr("start", propart[0])
+                      .attr("end", propart[1])
+                      .attr("name", namez)
+                      .attr("data-original-x", start)
+                      .attr("data-original-width", rectWidth) // Store the original width
+                      .attr("display", dbname === "phobius" ? "block" :"none")
+                       // Set the frame color
+                      .attr('stroke', function(d) {
+                          var idx = rankingArray.indexOf(dbname);
+                          return distinctColors[idx];
+
+                        })
+                      .attr("stroke-width", 1) // Set the frame width
+                      .attr("opacity", transparency)
+                      .on("mouseover", function() {
+                        // Get domain information
+                        const name = d3.select(this).attr("name");
+                        const start = d3.select(this).attr("start");
+                        const end = d3.select(this).attr("end");
+
+                        // Append a tooltip element to the body
+                        const tooltip = d3.select("body")
+                            .append("div")
+                            .attr("class", "tooltip")
+                            .style("display", "none");
+
+                        // Set tooltip content and position
+                        tooltip.html(`<strong>Name:</strong> ${name}<br><strong>Start:</strong> ${start}<br><strong>End:</strong> ${end}`)
+                            .style("left", (event.pageX) + "px")  // Position tooltip horizontally
+                            .style("top", (event.pageY + 10) + "px")  // Position tooltip vertically
+                            .style("display", "block");  // Display tooltip
+
+                        // Smoothly change the fill color of the domain rectangle to highlight it
+                        d3.select(this).transition().duration(200)
+                            .attr('fill', '#008060');
+                      })
+                      .on("mouseout", function() {
+                        // Smoothly reset the fill color of the domain rectangle when mouse leaves
+                        d3.select(".tooltip").remove();
+                        var originalColor = d3.select(this).attr("data-original-color");
+                        d3.select(this).transition().duration(200)
+                          .attr('fill', originalColor);
+                      });
+
+                      var text = canvas.append("text")
+                      .attr("x", start + rectWidth / 2.0)
+                      .attr("y", 30 + rectHeight / 2.0)
+                      .attr("start", propart[0])
+                      .attr("end", propart[1])
+                      .attr("text-anchor", "middle")
+                      .text(shortname)
+                      .attr("dbname", dbname)
+                      .attr("width", rectWidth)
+                      .attr("font", 12)
+                      .attr("length", shortname === null ? 0 : shortname.length)
+                      .style("fill", "black")
+                      .style("font-size", "12px")
+                      .style("font-family", "monospace")
+                      .classed(keyname + dbname, true)
+                      .classed("sequence-part", true) 
+                      .attr("data-original-x", start + rectWidth / 2.0)
+                      .attr("data-original-width", rectWidth)
+                      .attr("display", "none");
+                      //dbname === "pfam" ? "block" :
+
+                      // If the text length is greater than the rectangle width, adjust the font size
+                      if (text.node().getBBox().width > rectWidth) {
+                      var ratio = rectWidth / text.node().getBBox().width;
+                      var newFontSize = parseFloat(text.style("font-size")) * ratio;
+                      text.style("font-size", newFontSize + "px");
+                      // Re-adjust the x position after changing the font size
+                      text.attr("x", 10 + start + rectWidth / 2.0);
+
+                          }
+
+                          // Store the intervals data for this keyname
+                          if (!intervalsData[keyname + dbname]) {
+                            intervalsData[keyname + dbname] = [];
+                          }
+
+                          // Inside your loop where you create intervals
+                          intervalsData[keyname + dbname].push({
+                            start: propart[0],
+                            end: propart[1],
+                            name: namez
+                          });
+
+                          // Update the information box for all visible shapes
+                          updateInfoBox();
+                    }
+                }
+            }
+          }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const sequenceLetters = document.querySelectorAll(".sequence-letter");
+      const backboneLine = document.getElementById("backbone-line");
+
+      sequenceLetters.forEach(letter => {
+        letter.addEventListener("mouseover", handleLetterMouseOver);
+        letter.addEventListener("mouseout", handleLetterMouseOut);
+      });
+
+      function handleLetterMouseOver(event) {
+        const letter = event.target;
+        const letterPosition = letter.getBoundingClientRect();
+        const sequenceContainerPosition = sequenceContainer.getBoundingClientRect();
+
+        // Calculate the adjusted position of the letter based on scrolling and container position
+        const adjustedLetterPosition = letterPosition.left - sequenceContainerPosition.left + sequenceContainer.scrollLeft + (canvasWidth/2-(originalBackboneWidth*currentZoomLevel)/2) - letterSpacing/2;
+
+        // Show the gray line aligned with the backbone
+        backboneLine.style.display = "block";
+        backboneLine.style.left = `${adjustedLetterPosition}px`;
+
+        const borderSize = letterSpacing + 6.01;
+        const borderColor = "rgba(128, 128, 128, 0.3)";
+
+        // Set both the left and right borders together
+        backboneLine.style.border = `${borderSize/2}px solid ${borderColor}`;
+        backboneLine.style.opacity = 0.5;
+      }
+
+      function handleLetterMouseOut() {
+        // Hide the gray line when the mouse leaves the letter
+        backboneLine.style.display = "none";
+      }
+    });
+
+    function calculateOverlapLength(innerStart, innerEnd, outerStart, outerEnd) {
+      if (innerStart >= outerStart && innerStart <= outerEnd ||
+          innerEnd >= outerStart && innerEnd <= outerEnd ||
+          innerStart <= outerStart && innerEnd >= outerEnd) {
+        // There's an overlap
+        const overlapStart = Math.max(innerStart, outerStart);
+        const overlapEnd = Math.min(innerEnd, outerEnd);
+        return overlapEnd - overlapStart;
+      } else {
+        // No overlap
+        return 0;
+      }
+    }
+                // Create a filtering function
+                function filterRectangles(d) {
+              return (
+                parseFloat(d.attr("start")) === filterCriteria.start &&
+                parseFloat(d.attr("end")) === filterCriteria.end &&
+                d.classed(filterCriteria.keyname + filterCriteria.dbname)
+              );
+            }
+
+
+            function removeInterval(biggerInterval, smallerInterval) {
+
+              const remainingIntervals = [];
+
+              // Add the interval before the smaller interval (if any)
+              if (biggerInterval[0] < smallerInterval[0]) {
+                remainingIntervals.push([biggerInterval[0], smallerInterval[0]]);
+              }
+
+              // Add the interval after the smaller interval (if any)
+              if (biggerInterval[1] > smallerInterval[1]) {
+                remainingIntervals.push([smallerInterval[1], biggerInterval[1]]);
+              }
+
+              return remainingIntervals;
+            }
+
+    let toleranceRate = 0.3;
+    let visibleRectangles = [];
+    function defaultSetter(){
+      let backboneIntervals = [[1,originalBackboneWidth/3]];
+      for(let i=0; i<rankingArray.length; i++){
+        var preferred = rankingArray[i];
+        var keys = Object.keys(intervalsData);
+        for (let a=0; a < keys.length; a++){
+          var currentKey = keys[a];
+          if(currentKey.includes(preferred)){
+            let defaultIntervals = intervalsData[currentKey];
+            
+
+            for (let j = 0; j < defaultIntervals.length; j++) {
+              let isInside = false;
+              let defaultInterval = defaultIntervals[j];
+              console.log("round", currentKey, backboneIntervals);
+              for (let k = 0; k < backboneIntervals.length; k++) {
+                let backboneInterval = backboneIntervals[k];
+                console.log("backbone", backboneInterval);
+                let backLength = backboneInterval[1] - backboneInterval[0]; 
+                let addPart = (backLength * toleranceRate) / 2.0;
+                let toleranceIntervalStart = backboneInterval[0] - addPart;
+                let toleranceIntervalEnd = backboneInterval[1] + addPart;
+                console.log("Still Func2", currentKey, preferred, defaultInterval["start"], toleranceIntervalStart, defaultInterval["end"], toleranceIntervalEnd, defaultIntervals);
+                if (
+                  defaultInterval["start"] >= toleranceIntervalStart &&
+                  defaultInterval["end"] <= toleranceIntervalEnd
+                )
+                {
+                  
+                  let d = d3.selectAll("." + currentKey); // Select all elements with the class 'currentKey'
+
+                  if (d) {
+                    d.each(function() {
+                      let rect = d3.select(this);
+                      let rectStart = parseFloat(rect.attr("start"));
+                      let rectEnd = parseFloat(rect.attr("end"));
+
+                      if (rectStart === defaultInterval["start"] && rectEnd === defaultInterval["end"]) {
+                        rect.attr("display", "block");
+                        visibleRectangles.push(rect);
+                        var indexStart = currentKey.search(preferred);
+                        var keyname = currentKey.substring(0, indexStart);
+                        const tickbox = document.getElementById(`tickbox-${keyname}-${preferred}`);
+                        tickbox.checked = true;
+                      }
+                    });
+                  }
+
+                  
+                  backboneIntervals[k]=[0,0];
+                  
+                  if (backboneInterval[0] < defaultInterval["start"]) {
+                    backboneIntervals.push([backboneInterval[0], defaultInterval["start"]]);
+                  }
+
+                  // Add the interval after the smaller interval (if any)
+                  if (backboneInterval[1] > defaultInterval["end"]) {
+                    backboneIntervals.push([defaultInterval["end"], backboneInterval[1]]);
+                  }
+
+                  
+                }
+              }
+            }
+
+
+
+            //const matchingRectangles = canvas.selectAll("rect.sequence-part").filter(filterRectangles);
+            //matchingRectangles.attr("fill", "red"); 
+          }
+        }
+      }
+      isVisibleNow = true;
+    }
+    
+    
+    const defaultSetterButton = document.getElementById("default-setter-button");
+
+    defaultSetterButton.addEventListener("click", function () {
+
+      d3.selectAll("rect.sequence-part")
+        .attr("display", function () {
+          // Get the classed value "dbname"
+          const isPhobius = d3.select(this).attr("dbname");
+          if (isPhobius == "phobius"){
+            return "block";
+          }
+          else{
+            return "none";
+          }
+        });
+
+      d3.selectAll("text.sequence-part")
+        .attr("display", function () {
+          // Get the classed value "dbname"
+          const isPhobius = d3.select(this).attr("dbname");
+          if (isPhobius == "phobius"){
+            return "block";
+          }
+          else{
+            return "none";
+          }
+          // Use the classed value to set the "display" attribute
+        });
+      if (isVisibleNow == false){
+              // Loop through visibleRectangles and show only those rectangles
+        for (let i = 0; i < visibleRectangles.length; i++) {
+          let rectVis = visibleRectangles[i];
+          rectVis.attr("display", "block");
+        }
+      }
+      isVisibleNow = !isVisibleNow;
+      updateInfoBox();
+    });
+
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataString = urlParams.get('data');
+
+    if (dataString) {
+    const data = JSON.parse(dataString);
+    //canvas.call(zoom);
+    createShapes(data);
+    applyZoom();
+    console.log("Before Func");
+    defaultSetter();
+    updateInfoBox();
+
+
+    } else {
+    console.error('Data not found in URL parameters.');
+    }
+
+  </script>
+</body>
+</html>

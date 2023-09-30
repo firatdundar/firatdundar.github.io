@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>SPArc</title>
+  <link rel="stylesheet" type="text/css" href="test.css">
+  <style>
+
+    .white-bg-container {
+          background-color: white; /* Set the background color to white */
+          padding: 45px; /* Add padding for spacing inside the container */
+          /* Adjust the container's position and size as needed */
+          position: absolute;
+          overflow: hidden;
+          bottom: 0px;
+          width: 100%;
+          z-index: 1; /* Ensure it's above other content */
+        }
+    /* Add CSS styles to position the logo */
+    .logo {
+      position: fixed;
+      bottom: 10px;
+      left: 45%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the logo appears above other content */
+      width: 125px;
+    }
+    .logo2 {
+      position: fixed;
+      top: 10px;
+      left: 7%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the logo appears above other content */
+      width: 250px;
+    }
+
+    .logo3 {
+      position: fixed;
+      bottom: 10px;
+      left: 55%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the logo appears above other content */
+      width: 65px;
+    }
+    .powered-by {
+      font-size: 14px; /* Adjust the font size as needed */
+      position: fixed;
+      bottom: 50px; /* Adjust the distance from the bottom as needed */
+      left: 45%;
+      transform: translateX(-50%);
+      z-index: 1000; /* Ensure the text appears above other content */
+    }
+
+    html, body {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+  </style>
+</head>
+
+<!-- Search Button HTML -->
+<body>
+  <div class="Card">
+    <div class="CardInner">
+      <label class="search-label">Search Protein Entry</label>
+      <div class="search-container">
+        <div class="search-button" onclick="searchProtein()" style="position: absolute; top: 490px; left: 790px;">
+          <div class="spinner"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="search-input">
+          <input id="protein-input" placeholder="e.g. PF02932, P41180"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="white-bg-container"></div>
+  <!-- <img src="sparclogo.png" alt="Your Logo" class="logo2">-->
+  <img src="lablogo.png" alt="Your Logo" class="logo3">
+  <div class="powered-by">Powered By</div>
+  <img src="logo.jpg" alt="Your Logo" class="logo">
+  <!-- Getting Input Value -->
+  <script>
+    function searchProtein() {
+      var inputElement = document.getElementById("protein-input");
+      var inputValue = inputElement.value;
+      var spinner = document.querySelector('.search-button .spinner');
+
+      // Show the spinner (add a class to set opacity to 1)
+      spinner.classList.add('visible');
+      fetch('/process-input', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputValue: inputValue }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Error: ' + response.status);
+          }
+        })
+        .then((data) => {
+          // Handle the response from the server
+          console.log('Server response:', data.result);
+  
+          // Redirect to the result page and pass the data as a query parameter
+          window.location.href = '/result-page?data=' + encodeURIComponent(JSON.stringify(data));
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          // Hide the spinner after the fetch operation is complete
+          spinner.classList.remove('visible');
+        });
+    }
+  </script>
+</body>
+</html>
